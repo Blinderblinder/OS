@@ -1,0 +1,58 @@
+#include<stdio.h>
+#include<fcntl.h>
+#include<unistd.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+
+int main(int argc, char* argv[])
+{
+    int fd_out = open(argv[1], O_RDONLY);
+    if(fd_out == -1)
+    {
+        printf("Error in opening the input file.\n");
+        return -1;
+    }
+    int fd_in = open(argv[2], O_WRONLY | O_CREAT, S_IXUSR | S_IRUSR | S_IWUSR);
+    if(fd_in == -1)
+    {
+        printf("Error in opening the output file.\n");
+        return -1;
+    }
+
+    char buff[128] = {0};
+    while(1)
+    {
+        int nbytes;
+        nbytes = read(fd_out, buff, 128);
+        if(nbytes == -1)
+        {
+            printf("Error in read bytes from the input file.");
+            return -1;
+        }
+        else if(nbytes == 128)
+        {
+            int writebytes;
+            writebytes = write(fd_in, buff, 128);
+            if(writebytes == -1)
+            {
+                printf("Error in writing bytes to input file.");
+                return -1;
+            }
+        }
+        else if(nbytes!=0 && nbytes!=128)
+        {
+            int writebytes2;
+            writebytes2 = write(fd_in, buff, nbytes);
+            if (writebytes2 == -1)
+            {
+                printf("Error in writing bytes to input file.");
+                return -1;
+            }
+        }
+        else if(nbytes == 0)
+        {
+            break;
+        }
+    }
+    return 0;
+}
